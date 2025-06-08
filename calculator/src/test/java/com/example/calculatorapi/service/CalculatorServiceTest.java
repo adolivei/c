@@ -56,15 +56,13 @@ class CalculatorServiceTest {
     @Test
     @SneakyThrows
     void handleCalculation_successfulOperation_sendsSuccessResponse() {
-        // Given
+
         when(operationFactory.getOperation("sum")).thenReturn(calculatorOperation);
         when(calculatorOperation.calculate(request.a(), request.b()))
             .thenReturn(new BigDecimal("16.0"));
 
-        // When
         calculatorService.handleCalculation(request);
 
-        // Then
         verify(kafkaTemplate).send(eq("calc-responses"), responseCaptor.capture());
         CalculationResponse response = responseCaptor.getValue();
         assertThat(response.correlationId()).isEqualTo(correlationId);
@@ -75,7 +73,7 @@ class CalculatorServiceTest {
     @Test
     @SneakyThrows
     void handleCalculation_arithmeticError_sendsErrorResponse() {
-        // Given
+
         when(operationFactory.getOperation("division")).thenReturn(calculatorOperation);
         when(calculatorOperation.calculate(any(), any()))
             .thenThrow(new ArithmeticException("Division by zero"));
@@ -87,10 +85,8 @@ class CalculatorServiceTest {
             correlationId
         );
 
-        // When
         calculatorService.handleCalculation(request);
 
-        // Then
         verify(kafkaTemplate).send(eq("calc-responses"), responseCaptor.capture());
         CalculationResponse response = responseCaptor.getValue();
         assertThat(response.correlationId()).isEqualTo(correlationId);
@@ -101,7 +97,7 @@ class CalculatorServiceTest {
     @Test
     @SneakyThrows
     void handleCalculation_unsupportedOperation_sendsErrorResponse() {
-        // Given
+
         when(operationFactory.getOperation("unsupported"))
             .thenThrow(new IllegalArgumentException("Unsupported operation: unsupported"));
 
@@ -112,10 +108,8 @@ class CalculatorServiceTest {
             correlationId
         );
 
-        // When
         calculatorService.handleCalculation(request);
 
-        // Then
         verify(kafkaTemplate).send(eq("calc-responses"), responseCaptor.capture());
         CalculationResponse response = responseCaptor.getValue();
         assertThat(response.correlationId()).isEqualTo(correlationId);
@@ -126,15 +120,13 @@ class CalculatorServiceTest {
     @Test
     @SneakyThrows
     void handleCalculation_unexpectedError_sendsInternalErrorResponse() {
-        // Given
+
         when(operationFactory.getOperation("sum")).thenReturn(calculatorOperation);
         when(calculatorOperation.calculate(any(), any()))
             .thenThrow(new RuntimeException("Unexpected error"));
 
-        // When
         calculatorService.handleCalculation(request);
 
-        // Then
         verify(kafkaTemplate).send(eq("calc-responses"), responseCaptor.capture());
         CalculationResponse response = responseCaptor.getValue();
         assertThat(response.correlationId()).isEqualTo(correlationId);

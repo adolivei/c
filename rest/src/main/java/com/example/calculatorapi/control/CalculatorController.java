@@ -32,7 +32,6 @@ public class CalculatorController {
     private final Map<String, CompletableFuture<CalculationResponse>> pending = new ConcurrentHashMap<>();
     private static final long TIMEOUT_MS = 5000;
 
-    // Package-private getter for testing
     Map<String, CompletableFuture<CalculationResponse>> getPending() {
         return pending;
     }
@@ -64,7 +63,6 @@ public class CalculatorController {
         MDC.put("correlationId", correlationId);
         log.info("Received calculation request: {} {} {}", request.a(), request.operation(), request.b());
 
-        // Validate request
         if (request.operation() == null) {
             return ResponseEntity.badRequest()
                 .body(new RestCalculationResponse(null, "Operation cannot be null"));
